@@ -1,11 +1,7 @@
-export default function RestartButton({display, restart}: {display: boolean, restart: () => void}) {
+export default function RestartButton({restart}: {restart: () => void}) {
   return(
-    <>
-        {display &&
-            <button className="restart" onClick={restart}>
-                Restart Game
-            </button>
-        }
-    </>
+    <button className="restart" onClick={restart}>
+        Restart Game
+    </button>
   );
 }

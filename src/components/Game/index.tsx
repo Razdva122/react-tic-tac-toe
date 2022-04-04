@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Square from '../Square';
 import RestartButton from '../RestartButton';
 
-import { initState, possibleWins } from './const';
-import type {TBoard, TCellValue} from '../types';
+import { initState, possibleWins, STORAGE_KEY } from './const';
+import type { TBoard, TCellValue, IApplicationState } from '../types';
 
 function Board() {
-  const [state, updateState] = useState(initState);
+  const [state, updateState] = useState<IApplicationState>(initState);
+
+  useEffect(() => {
+    if (!state.isLoading) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } else {
+      setTimeout(() => {
+        const storageState = localStorage.getItem(STORAGE_KEY);
+
+        if (storageState) {
+          updateState(JSON.parse(storageState));
+        } else {
+          updateState({...initState, isLoading: false});
+        }
+      }, 5000)
+    }
+  });
 
   function getValueOfCellFromBoard(x: number, y: number, board: TBoard) {
     return board[y][x];
@@ -30,6 +46,7 @@ function Board() {
       cloneBoard[y][x] = prevState.turn % 2 === 0 ? 'X' : 'O';
 
       return {
+        isLoading: prevState.isLoading,
         turn: prevState.turn + 1,
         board: cloneBoard,
         winner: prevState.winner
@@ -63,25 +80,25 @@ function Board() {
   }
 
   function getStatusOfGame() {
-    let status;
-
     if (state.winner) {
-      status = `Game is Ended. Winner is ${state.winner}`;
+      return `Game is Ended. Winner is ${state.winner}`;
     } else if (state.turn === 9) {
-      status = `Game is Ended. Tie`;
+      return `Game is Ended. Tie`;
     } else {
-      status = state.turn % 2 === 0 ? 'Next player: X' : 'Next player: O'
+      return state.turn % 2 === 0 ? 'Next player: X' : 'Next player: O'
     }
-
-    return status;
-  }
-
-  function isGameEnded() {
-    return state.winner !== '' || state.turn === 9;
   }
 
   function restartGame() {
-    updateState(initState);
+    updateState({...initState, isLoading: false});
+  }
+
+  if (state.isLoading) {
+    return (
+      <div>
+        <div className="status">Game is loading</div>
+      </div>
+    )
   }
 
   return (
@@ -104,7 +121,7 @@ function Board() {
           )
         })
       }
-      <RestartButton display={isGameEnded()} restart={restartGame}/>
+      <RestartButton restart={restartGame}/>
     </div>
   );
 }
