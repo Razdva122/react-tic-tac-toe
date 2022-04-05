@@ -4,27 +4,26 @@ import Square from '../Square';
 import RestartButton from '../RestartButton';
 
 import { initState, possibleWins, STORAGE_KEY } from './const';
+import { useCustomEffect } from './hook';
 import type { TBoard, TCellValue, IApplicationState } from '../types';
 
 function Board() {
   const [state, updateState] = useState<IApplicationState>(initState);
   const [isLoading, updateLoadingState] = useState(true);
 
-  useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } else {
-      setTimeout(() => {
-        const storageState = localStorage.getItem(STORAGE_KEY);
-        updateLoadingState(false);
+  useCustomEffect(() => {
+    setTimeout(() => {
+      const storageState = localStorage.getItem(STORAGE_KEY);
+      updateLoadingState(false);
 
-        if (storageState) {
-          updateState(JSON.parse(storageState));
-        } else {
-          updateState(initState);
-        }
-      }, 5000);
-    }
+      if (storageState) {
+        updateState(JSON.parse(storageState));
+      } else {
+        updateState(initState);
+      }
+    }, 5000);
+  }, () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   });
 
   function getValueOfCellFromBoard(x: number, y: number, board: TBoard) {
