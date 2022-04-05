@@ -8,20 +8,22 @@ import type { TBoard, TCellValue, IApplicationState } from '../types';
 
 function Board() {
   const [state, updateState] = useState<IApplicationState>(initState);
+  const [isLoading, updateLoadingState] = useState(true);
 
   useEffect(() => {
-    if (!state.isLoading) {
+    if (!isLoading) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } else {
       setTimeout(() => {
         const storageState = localStorage.getItem(STORAGE_KEY);
+        updateLoadingState(false);
 
         if (storageState) {
           updateState(JSON.parse(storageState));
         } else {
-          updateState({...initState, isLoading: false});
+          updateState(initState);
         }
-      }, 5000)
+      }, 5000);
     }
   });
 
@@ -46,7 +48,6 @@ function Board() {
       cloneBoard[y][x] = prevState.turn % 2 === 0 ? 'X' : 'O';
 
       return {
-        isLoading: prevState.isLoading,
         turn: prevState.turn + 1,
         board: cloneBoard,
         winner: prevState.winner
@@ -90,10 +91,10 @@ function Board() {
   }
 
   function restartGame() {
-    updateState({...initState, isLoading: false});
+    updateState(initState);
   }
 
-  if (state.isLoading) {
+  if (isLoading) {
     return (
       <div>
         <div className="status">Game is loading</div>

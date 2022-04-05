@@ -1,7 +1,6 @@
 import type {IApplicationState} from '../types';
 
 export const initState: IApplicationState = {
-  isLoading: true,
   turn: 0,
   board: [
     ['', '', ''],
